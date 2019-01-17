@@ -616,4 +616,9 @@ config LEDS_VERSATILE
 comment "LED Triggers"
 source "drivers/leds/trigger/Kconfig"
 
+config LEDS_TNT
+        tristate "LED_TNT Support for thountech"
+        help
+          LED_TNT Support for thountech
+
 endif # NEW_LEDS
