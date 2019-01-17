@@ -14,6 +14,9 @@
  *
  */
 
+//EJM this is way newer than the file that existed from TnT
+// EJM This seems to have way more updates than our other one
+
 #include <linux/ethtool.h>
 #include <linux/kernel.h>
 #include <linux/module.h>

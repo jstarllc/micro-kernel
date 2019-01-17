@@ -32,6 +32,17 @@
 #include <linux/regmap.h>
 #include <linux/pm_runtime.h>
 #include <linux/soc/rockchip/rk_vendor_storage.h>
+
+//EJM START
+#include <linux/kernel.h>
+#include <linux/errno.h>
+#include <linux/miscdevice.h>
+#include <linux/fs.h>
+#include <asm/uaccess.h>
+#include <asm/io.h>
+#include <linux/slab.h>
+//EJM END
+
 #include "stmmac_platform.h"
 
 struct rk_priv_data;
@@ -552,7 +563,13 @@ static const struct rk_gmac_ops rk3308_ops = {
 #define RK3328_GRF_MAC_CON0	0x0900
 #define RK3328_GRF_MAC_CON1	0x0904
 #define RK3328_GRF_MAC_CON2	0x0908
+
+// EJM START
+#define RK3328_GRF_MACPHY_CON0	0xb00
 #define RK3328_GRF_MACPHY_CON1	0xb04
+#define RK3328_GRF_MACPHY_CON2	0xb08
+#define RK3328_GRF_MACPHY_CON3	0xb0c
+//EJM END
 
 /* RK3328_GRF_MAC_CON0 */
 #define RK3328_GMAC_CLK_RX_DL_CFG(val)	HIWORD_UPDATE(val, 0x7F, 7)
@@ -1318,6 +1335,23 @@ static struct rk_priv_data *rk_gmac_setup(struct platform_device *pdev,
 		else
 			bsp_priv->clock_input = false;
 	}
+	//EJM START
+	// EJM is this below section needed?
+	// EJM difference between internal/integrated
+	ret = of_property_read_string(dev->of_node, "phy-type", &strings);
+	if (!ret && !strcmp(strings, "integrated")) { //EJM should that string be "integrated??
+		bsp_priv->integrated_phy = true;
+		bsp_priv->phy_reset = devm_reset_control_get(dev,
+				  "mac-phy");
+		if (IS_ERR(bsp_priv->phy_reset)) {
+			dev_info(dev, "no macphy_reset control found\n");
+			bsp_priv->phy_reset = NULL;
+		}
+	} else {
+		bsp_priv->integrated_phy = false;
+	}
+	dev_info(dev, "integrated PHY? (%s).\n",  strings);
+	// EJM END
 
 	ret = of_property_read_u32(dev->of_node, "tx_delay", &value);
 	if (ret) {
@@ -1443,17 +1477,137 @@ static void rk_fix_speed(void *priv, unsigned int speed)
 	}
 }
 
-void __weak rk_devinfo_get_eth_mac(u8 *mac)
+//EJM START
+void  trans( char *src ,u8 * k) 
 {
+	char c;
+	int i;
+	int temp;
+	int temp2;
+
+	if( (src == NULL) ||(strlen(src) < 17 ) )
+	{
+		printk( "Arg Error\n" );
+		return ;
+	}
+
+	for( i = 0; i < 6; i++ )
+	{
+		temp = 0;
+		temp2 = 0;
+		c = *src;
+
+		if( c == ':' ){
+			src++;
+			c = *src;
+		}
+		
+		if( c >= 'a' && c <= 'f' )
+			temp = ( c - 'a' ) + 10; 
+		else
+			temp = ( c - '0' ) ;
+
+		src++;
+		c = *src;
+
+		if( c >= 'a' && c <= 'f' )
+			temp2 = ( c - 'a' ) + 10;
+		else
+			temp2 = ( c - '0' ) ;
+
+		temp = temp * 16;
+		temp += temp2;
+		src++;
+
+		*(k+i) = temp;
+
+	}
+
 }
 
+
+#define WLAN_MAC_FILE "/system/etc/firmware/mac_address.txt"
+
+
+int rk_devinfo_get_eth_mac(u8 *mac)
+{
+	int iCnt = 0;
+	int result = 0;
+	
+	struct  file *filp = NULL;
+	char read_macStr[32];
+	
+	mm_segment_t old_fs;
+	ssize_t ret;
+	u8 eth_mac[6];
+
+
+	printk("[%s:%d] -------------\r\n", __FUNCTION__, __LINE__);
+
+
+	old_fs = get_fs();
+    set_fs(KERNEL_DS);
+    
+    memset(read_macStr, 0, 32);
+	memset(eth_mac, 0, 6);
+	
+	filp = filp_open(WLAN_MAC_FILE, O_RDONLY,0);
+	if (IS_ERR(filp))
+	{
+		printk("[DWMAC] open %s failed.\r\n", WLAN_MAC_FILE);
+		return result;
+
+	}
+	else
+	{ 
+		printk("open %s success.\r\n", WLAN_MAC_FILE);
+
+		filp->f_pos = 0;
+
+    
+        ret = vfs_read(filp, read_macStr, 17, &filp->f_pos);
+        if (ret == 0)
+        {
+			filp_close(filp, NULL); 
+        	return 0;
+        }
+    
+	    filp_close(filp, NULL);  /* filp_close(filp, current->files) ?  */
+	    /* restore kernel memory setting */
+	    set_fs(old_fs);
+
+#if 1
+		for(iCnt = 0; iCnt < 6; iCnt++) {
+			read_macStr[(iCnt * 3) + 2] = 0;
+			eth_mac[iCnt] = (u8) simple_strtol(&read_macStr[iCnt * 3], NULL, 16);
+		}
+#else
+		trans(read_macStr, eth_mac);
+#endif
+
+		result = 6;
+		
+		printk("[%s:%d] ---->>>>>>>>>>  mac address: %02x:%02x:%02x:%02x:%02x:%02x",
+					__func__, __LINE__,  eth_mac[0], eth_mac[1], eth_mac[2],
+					eth_mac[3], eth_mac[4], eth_mac[5]);
+
+		memcpy(mac, eth_mac, result);
+	}
+
+	return result;
+	
+}
+
+//EJM END
 void rk_get_eth_addr(void *priv, unsigned char *addr)
 {
 	int ret;
 	struct rk_priv_data *bsp_priv = priv;
 	struct device *dev = &bsp_priv->pdev->dev;
 
-	rk_devinfo_get_eth_mac(addr);
+	ret = rk_devinfo_get_eth_mac(addr);
+//	msleep(10);
+
 	if (is_valid_ether_addr(addr))
 		goto out;
 

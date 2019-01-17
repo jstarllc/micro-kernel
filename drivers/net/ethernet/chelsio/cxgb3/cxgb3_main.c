@@ -2549,6 +2549,8 @@ static int cxgb_set_mac_addr(struct net_device *dev, void *p)
 	struct adapter *adapter = pi->adapter;
 	struct sockaddr *addr = p;
 
+//	printk("[%s:%d] -------------\r\n", __FUNCTION__, __LINE__);
+
 	if (!is_valid_ether_addr(addr->sa_data))
 		return -EADDRNOTAVAIL;
 
