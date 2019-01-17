@@ -160,7 +160,7 @@ static int __watchdog_register_device(struct watchdog_device *wdd)
 
 	/* Use alias for watchdog id if possible */
 	if (wdd->parent) {
-		ret = of_alias_get_id(wdd->parent->of_node, "watchdog");
+		ret = of_alias_get_id(wdd->parent->of_node, "wdt");
 		if (ret >= 0)
 			id = ida_simple_get(&watchdog_ida, ret,
 					    ret + 1, GFP_KERNEL);
@@ -194,7 +194,7 @@ static int __watchdog_register_device(struct watchdog_device *wdd)
 
 	devno = wdd->cdev.dev;
 	wdd->dev = device_create(watchdog_class, wdd->parent, devno,
-					NULL, "watchdog%d", wdd->id);
+					NULL, "wdt%d", wdd->id);
 	if (IS_ERR(wdd->dev)) {
 		watchdog_dev_unregister(wdd);
 		ida_simple_remove(&watchdog_ida, id);
