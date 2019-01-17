@@ -1,0 +1,13 @@
+#
+# TNT Configurtion
+
+menu "TNT Device support"
+
+config TNT_IO
+	tristate "TNT IO device init" 
+	help
+	Say Y here to enable TNT driver init
+
+endmenu
+
+
