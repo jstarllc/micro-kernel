@@ -25,6 +25,7 @@
 #include "rockchip_i2s.h"
 
 #define DRV_NAME "rockchip-i2s"
+#define CLK_ALWAYS_ON	1
 
 struct rk_i2s_pins {
 	u32 reg_offset;
@@ -63,9 +64,12 @@ static int i2s_runtime_suspend(struct device *dev)
 {
 	struct rk_i2s_dev *i2s = dev_get_drvdata(dev);
 
+	dev_err(i2s->dev, "i2s_runtime_suspend\n");
+
+#if (CLK_ALWAYS_ON == 0)
 	regcache_cache_only(i2s->regmap, true);
 	clk_disable_unprepare(i2s->mclk);
-
+#endif
 	return 0;
 }
 
@@ -73,6 +77,8 @@ static int i2s_runtime_resume(struct device *dev)
 {
 	struct rk_i2s_dev *i2s = dev_get_drvdata(dev);
 	int ret;
+
+	dev_err(i2s->dev, "i2s_runtime_resume\n");
 
 	ret = clk_prepare_enable(i2s->mclk);
 	if (ret) {
@@ -100,6 +106,9 @@ static void rockchip_snd_txctrl(struct rk_i2s_dev *i2s, int on)
 	unsigned int val = 0;
 	int retry = 10;
 
+#if (CLK_ALWAYS_ON == 1)
+	on = true;
+#endif
 	spin_lock(&lock);
 	if (on) {
 		regmap_update_bits(i2s->regmap, I2S_DMACR,
@@ -148,6 +157,10 @@ static void rockchip_snd_rxctrl(struct rk_i2s_dev *i2s, int on)
 {
 	unsigned int val = 0;
 	int retry = 10;
+
+#if (CLK_ALWAYS_ON == 1)
+	on = true;
+#endif
 
 	spin_lock(&lock);
 	if (on) {
@@ -294,15 +307,41 @@ static int rockchip_i2s_hw_params(struct snd_pcm_substream *substream,
 {
 	struct rk_i2s_dev *i2s = to_info(dai);
 	unsigned int val = 0;
-	unsigned int mclk_rate, bclk_rate, div_bclk, div_lrck;
+	unsigned int mclk_adj, mclk_rate, bclk_rate, div_bclk, div_lrck;
 
 	if (i2s->is_master_mode) {
 		mclk_rate = clk_get_rate(i2s->mclk);
 		bclk_rate = i2s->bclk_fs * params_rate(params);
-		if (!bclk_rate)
+
+
+		// *** EJM this is the original before TnT changes
+		//if (!bclk_rate)
+		//	return -EINVAL;
+		//
+		//div_bclk = DIV_ROUND_CLOSEST(mclk_rate, bclk_rate);
+		// *** EJM end original
+
+
+
+		// *** EJM TnT Changes
+		// EJM this is very suspicious. May be the cause of the 
+		// i2s issues we're having with audio dropping out?
+#if 0
+		if (bclk_rate && mclk_rate % bclk_rate)
 			return -EINVAL;
 
-		div_bclk = DIV_ROUND_CLOSEST(mclk_rate, bclk_rate);
+		//EJM the line below was the TnT change, but it 
+		// looks like the DIV_ROUND_CLOSEST was a bugfix
+		// so i kept it. 
+		//div_bclk = mclk_adj / bclk_rate;
+		div_bclk = DIV_ROUND_CLOSEST(mclk_rate, bclk_rate); 
+#else
+		mclk_adj = (mclk_rate + (bclk_rate / 2));
+		div_bclk = mclk_adj / bclk_rate;
+#endif
+		// *** EJM end TnT Changes
+
+
 		div_lrck = bclk_rate / params_rate(params);
 		regmap_update_bits(i2s->regmap, I2S_CKR,
 				   I2S_CKR_MDIV_MASK,
@@ -313,6 +352,12 @@ static int rockchip_i2s_hw_params(struct snd_pcm_substream *substream,
 				   I2S_CKR_RSD_MASK,
 				   I2S_CKR_TSD(div_lrck) |
 				   I2S_CKR_RSD(div_lrck));
+
+// EJM TnT added this
+#if 1
+		dev_err(i2s->dev, "mclk:%d, bclk:%d, dbclk:%d, dlrck:%d\n", 
+			mclk_rate, bclk_rate, div_bclk, div_lrck);
+#endif
 	}
 
 	switch (params_format(params)) {
@@ -332,6 +377,8 @@ static int rockchip_i2s_hw_params(struct snd_pcm_substream *substream,
 		val |= I2S_TXCR_VDW(32);
 		break;
 	default:
+		dev_err(i2s->dev, "invalid format: %d\n",
+			params_format(params));
 		return -EINVAL;
 	}
 
@@ -462,7 +509,7 @@ static struct snd_soc_dai_driver rockchip_i2s_dai = {
 		.stream_name = "Playback",
 		.channels_min = 2,
 		.channels_max = 8,
-		.rates = SNDRV_PCM_RATE_8000_192000,
+		.rates = SNDRV_PCM_RATE_8000_192000 | SNDRV_PCM_RATE_8000_44100,
 		.formats = (SNDRV_PCM_FMTBIT_S8 |
 			    SNDRV_PCM_FMTBIT_S16_LE |
 			    SNDRV_PCM_FMTBIT_S20_3LE |
@@ -473,7 +520,7 @@ static struct snd_soc_dai_driver rockchip_i2s_dai = {
 		.stream_name = "Capture",
 		.channels_min = 2,
 		.channels_max = 2,
-		.rates = SNDRV_PCM_RATE_8000_192000,
+		.rates = SNDRV_PCM_RATE_8000_192000 | SNDRV_PCM_RATE_8000_44100,
 		.formats = (SNDRV_PCM_FMTBIT_S8 |
 			    SNDRV_PCM_FMTBIT_S16_LE |
 			    SNDRV_PCM_FMTBIT_S20_3LE |
@@ -739,6 +786,8 @@ static int rockchip_i2s_suspend(struct device *dev)
 {
 	struct rk_i2s_dev *i2s = dev_get_drvdata(dev);
 
+	dev_err(i2s->dev, "rockchip_i2s_suspend\n");
+
 	regcache_mark_dirty(i2s->regmap);
 
 	return 0;
@@ -748,6 +797,8 @@ static int rockchip_i2s_resume(struct device *dev)
 {
 	struct rk_i2s_dev *i2s = dev_get_drvdata(dev);
 	int ret;
+
+	dev_err(i2s->dev, "rockchip_i2s_resume\n");
 
 	ret = pm_runtime_get_sync(dev);
 	if (ret < 0)
