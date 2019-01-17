@@ -266,6 +266,8 @@ static int dhd_mon_if_change_mac(struct net_device *ndev, void *addr)
 	int ret = 0;
 	monitor_interface* mon_if;
 
+//	printk("[%s:%d] <<------ \r\n", __func__, __LINE__);
+
 	mon_if = ndev_to_monif(ndev);
 	if (mon_if == NULL || mon_if->real_ndev == NULL) {
 		MON_PRINT(" cannot find matched net dev, skip the packet\n");

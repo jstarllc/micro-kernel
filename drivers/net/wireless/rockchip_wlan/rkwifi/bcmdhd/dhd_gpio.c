@@ -138,8 +138,9 @@ static int dhd_wlan_set_carddetect(int present)
 static int dhd_wlan_get_mac_addr(unsigned char *buf)
 {
 	int err = 0;
-
-	printf("======== %s ========\n", __FUNCTION__);
+	printf("[EJM dhd_gpio.c  dhd_wlan_get_mac_addr called");
+	printf("<<<<<<<<======== %s ========>>>>>>>>> mac=%02X:%02X:%02X:%02X:%02X:%02X\n", __FUNCTION__,
+		buf[0], buf[1], buf[2], buf[3], buf[4], buf[5]);
 #ifdef EXAMPLE_GET_MAC
 	/* EXAMPLE code */
 	{
@@ -148,6 +149,10 @@ static int dhd_wlan_get_mac_addr(unsigned char *buf)
 	}
 #endif /* EXAMPLE_GET_MAC */
 	err = rockchip_wifi_mac_addr(buf);
+//EJM START
+	printf("[%s:%d]  wifi mac=%02X:%02X:%02X:%02X:%02X:%02X\n", __func__, __LINE__,
+		buf[0], buf[1], buf[2], buf[3], buf[4], buf[5]);
+//EJM END
 #ifdef EXAMPLE_GET_MAC_VER2
 	/* EXAMPLE code */
 	{

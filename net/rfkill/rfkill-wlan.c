@@ -53,6 +53,20 @@
 
 #define LOG(x...)   printk(KERN_INFO "[WLAN_RFKILL]: "x)
 
+//EJM START
+#ifndef MIN
+#define	MIN(a, b)   (((a) < (b)) ? (a) : (b))
+#endif
+
+#ifndef MACDBG
+#define MACDBG "%02x:%02x:%02x:%02x:%02x:%02x"
+#endif
+
+#ifndef MAC2STRDBG
+#define MAC2STRDBG(ea) (ea)[0], (ea)[1], (ea)[2], (ea)[3], (ea)[4], (ea)[5]
+#endif
+//EJM END
+
 extern struct mmc_host *primary_sdio_host;
 extern void mmc_pwrseq_power_off(struct mmc_host *host);
 
@@ -473,7 +487,7 @@ EXPORT_SYMBOL(rockchip_wifi_reset);
 u8 wifi_custom_mac_addr[6] = {0,0,0,0,0,0};
 
 //#define RANDOM_ADDRESS_SAVE
-static int get_wifi_addr_vendor(unsigned char *addr)
+int get_wifi_addr_vendor(unsigned char *addr)
 {
 	int ret;
 	int count = 5;
@@ -514,15 +528,226 @@ static int get_wifi_addr_vendor(unsigned char *addr)
 	return 0;
 }
 
+//EJM START
+void *rockchip_wifi_cfg_open(void)
+{
+	struct file *fp;
+	char filename[] = "/system/etc/firmware/mac_address.txt";
+	int size;
+
+	fp = filp_open(filename, O_RDONLY, 0);
+
+	 if (IS_ERR(fp)) {
+		 LOG("[ejm]%s: %s not found\n", __func__, filename);
+		 fp = NULL;
+		 goto err;
+	 }
+
+	 if (!S_ISREG(file_inode(fp)->i_mode)) {
+		 LOG("%s: %s is not regular file\n", __func__, filename);
+		 fp = NULL;
+		 goto err;
+	 }
+
+	 size = i_size_read(file_inode(fp));
+	 if (size <= 0) {
+		 LOG("%s: %s file size invalid %d\n", __func__, filename, size);
+		 fp = NULL;
+		 goto err;
+	 }
+
+err:
+	 return fp;
+}
+
+int rockchip_wifi_cfg_read(char *buf, int len, void *image)
+{
+	struct file *fp = (struct file *)image;
+	int rdlen;
+	int size;
+
+	if (!image) {
+		return 0;
+	}
+
+	fp->f_pos = 0;
+
+	size = i_size_read(file_inode(fp));
+	rdlen = kernel_read(fp, fp->f_pos, buf, MIN(len, size));
+
+	if (len >= size && size != rdlen) {
+		return -EIO;
+	}
+
+	if (rdlen > 0) {
+		fp->f_pos += rdlen;
+	}
+
+	return rdlen;
+}
+
+
+void  trans_str2bin( char *src ,u8 * k) 
+{
+	char c;
+	int i;
+	int temp;
+	int temp2;
+
+	if( (src == NULL) ||(strlen(src) < 17 ) )
+	{
+		printk( "Arg Error\n" );
+		return ;
+	}
+
+	for( i = 0; i < 6; i++ )
+	{
+		temp = 0;
+		temp2 = 0;
+		c = *src;
+
+		if( c == ':' ){
+			src++;
+			c = *src;
+		}
+		
+		if( c >= 'a' && c <= 'f' )
+			temp = ( c - 'a' ) + 10; 
+		else
+			temp = ( c - '0' ) ;
+
+		src++;
+		c = *src;
+
+		if( c >= 'a' && c <= 'f' )
+			temp2 = ( c - 'a' ) + 10;
+		else
+			temp2 = ( c - '0' ) ;
+
+		temp = temp * 16;
+		temp += temp2;
+		src++;
+
+		*(k+i) = temp;
+
+	}
+
+}
+
+#define WLAN_MAC_FILE "/system/etc/firmware/mac_address.txt"
+
+int rockchip_get_wifi_macStr(u8 *mac)
+{
+	ssize_t ret = 0;
+
+	//char filename[] = "/system/etc/firmware/mac_address.txt";
+
+	
+	struct  file *filp = NULL;
+	char eth_mac[32];
+	//mm_segment_t old_fs;
+	//u8 eth_mac[6];
+
+
+	printk("[WLAN-RFKILL EJM-1]%s:%d] -------------\r\n", __FUNCTION__, __LINE__);
+
+   	//msleep(10000);
+	old_fs = get_fs();
+    	set_fs(KERNEL_DS);
+    
+    	memset(eth_mac, 0, 32);
+	//memset(eth_mac, 0, 6);
+	
+	filp = filp_open(WLAN_MAC_FILE, O_RDONLY,0);
+    //filp = rockchip_wifi_cfg_open();
+	if (! filp || IS_ERR(filp))
+	{
+		printk("[WLAN-RFKILL EJM] open %s failed.\r\n", WLAN_MAC_FILE);
+		return ret;
+
+	}
+	else
+	{ 
+		printk("open %s success.\r\n", WLAN_MAC_FILE);
+
+		filp->f_pos = 0;
+
+    
+        ret = vfs_read(filp, eth_mac, 17, &filp->f_pos);
+        if (ret == 0)
+        {
+        	printk("[WLAN-RFKILL EJM] [%s:%d] %d : %s\r\n", __FUNCTION__, __LINE__, (int)ret, eth_mac);
+			 filp_close(filp, NULL);
+			 return ret;
+        }
+    	printk("[WLAN-RFKILL-EJM] mac addr is  %s.\r\n", eth_mac);
+
+	    filp_close(filp, NULL);  /* filp_close(filp, current->files) ?  */
+	    /* restore kernel memory setting */
+	    set_fs(old_fs);
+
+#if 0
+#if 1
+		for(iCnt = 0; iCnt < 6; iCnt++) {
+			wifi_mac[(iCnt * 3) + 2] = 0;
+			eth_mac[iCnt] = (u8) simple_strtol(&wifi_mac[iCnt * 3], NULL, 16);
+		}
+#else
+		trans_str2bin(wifi_mac, eth_mac);
+#endif
+#endif
+
+		printk("[WLAN-RFKILL-EJM] [%s:%d] ---->>>>>>>>>>  mac address: %s\r\n", __func__, __LINE__,  eth_mac);
+
+		memcpy(mac, eth_mac, strlen(eth_mac));
+	}
+
+	return ret;
+//EJM END	
+}
+
+//EJM below has changed
 int rockchip_wifi_mac_addr(unsigned char *buf)
 {
+	int i;
+	int getCount = 0;
 	char mac_buf[20] = {0};
 
 	LOG("%s: enter.\n", __func__);
+//	printk("%s: enter.\n", __func__);
+
+	memset(mac_buf, 0x00, sizeof(mac_buf));
+
+	getCount = rockchip_get_wifi_macStr(mac_buf);
+
+//	msleep(10);
+
+	if(getCount != 0)
+	{
+//		printk("%s: XXXXXXXXXXXXXXX--->>  custom mac=%s\n", __func__, mac_buf);
+
+		for(i = 0; i < 6; i++) {
+			mac_buf[(i * 3) + 2] = 0;
+			wifi_custom_mac_addr[i] = (u8) simple_strtol(&mac_buf[i * 3], NULL, 16);
+		}
+
+		if(wifi_custom_mac_addr[5] == 0xFF)
+		{
+			memset(mac_buf, 0x00, sizeof(mac_buf));
+		}
+		else
+		{
+			if (!is_zero_ether_addr(wifi_custom_mac_addr))
+			{
+				wifi_custom_mac_addr[5] = wifi_custom_mac_addr[5] + 1;
+			}
+		}
+	}
 
 	// from vendor storage
 	if (is_zero_ether_addr(wifi_custom_mac_addr)) {
 		if (get_wifi_addr_vendor(wifi_custom_mac_addr) != 0)
+			printk("%s: exit. Error: This mac address is unknown vendor.\n", __func__);
 			return -1;
 	}
 
@@ -536,11 +761,18 @@ int rockchip_wifi_mac_addr(unsigned char *buf)
 		if (!strncmp(wifi_chip_type_string, "rtl", 3))
 			wifi_custom_mac_addr[0] &= ~0x2; // for p2p
 	} else {
+		printk("%s: exit. Error: This mac address is not valid.\n", __func__);
 		LOG("This mac address is not valid, ignored...\n");
 		return -1;
 	}
 
 	memcpy(buf, wifi_custom_mac_addr, 6);
+
+//	printk("[%s:%d] exit. Success: "MACDBG"\n", __func__,	__LINE__, MAC2STRDBG(buf));
+
+
+//	msleep(10);
+		
 
 	return 0;
 }

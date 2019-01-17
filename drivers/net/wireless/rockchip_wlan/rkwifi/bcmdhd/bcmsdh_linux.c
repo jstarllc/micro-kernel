@@ -52,6 +52,12 @@ extern void dhdsdio_isr(void * args);
 #endif /* defined(CONFIG_ARCH_ODIN) */
 #include <dhd_linux.h>
 
+//EJM START
+#include <linux/rfkill-wlan.h>
+
+extern int get_wifi_chip_type(void);
+//EJM END
+
 /* driver info, initialized when bcmsdh_register is called */
 static bcmsdh_driver_t drvinfo = {NULL, NULL, NULL, NULL};
 
@@ -354,6 +360,7 @@ static irqreturn_t wlan_oob_irq(int irq, void *dev_id)
 
 int bcmsdh_oob_intr_register(bcmsdh_info_t *bcmsdh, bcmsdh_cb_fn_t oob_irq_handler,
 	void* oob_irq_handler_context)
+	int type; //EJM ADDED
 {
 	int err = 0;
 	bcmsdh_os_info_t *bcmsdh_osinfo = bcmsdh->os_cxt;
@@ -386,6 +393,12 @@ int bcmsdh_oob_intr_register(bcmsdh_info_t *bcmsdh, bcmsdh_cb_fn_t oob_irq_handl
 		bcmsdh_osinfo->oob_irq_registered = FALSE;
 		return err;
 	}
+	
+//EJM START
+	type = get_wifi_chip_type();
+	if (type == WIFI_AP6255)
+		bcmsdh_oob_intr_set(bcmsdh, FALSE);
+//EJM END
 
 #if defined(DISABLE_WOWLAN)
 	SDLX_MSG(("%s: disable_irq_wake\n", __FUNCTION__));

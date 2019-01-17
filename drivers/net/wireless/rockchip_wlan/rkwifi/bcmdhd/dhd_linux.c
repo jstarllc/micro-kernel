@@ -23,7 +23,7 @@
  * other than the GPL, without Broadcom's express prior written consent.
  *
  *
- * <<Broadcom-WL-IPTag/Open:>>
+ * <<Broadcom-WL-IPTag/Open:>>i
  *
  * $Id: dhd_linux.c 710862 2017-07-14 07:43:59Z $
  */
@@ -35,6 +35,8 @@
 #include <linux/syscalls.h>
 #include <event_log.h>
 #endif /* SHOW_LOGTRACE */
+
+#include <linux/rfkill-wlan.h> //EJM ADDED
 
 #include <linux/init.h>
 #include <linux/kernel.h>
@@ -4080,7 +4082,7 @@ int
 _dhd_set_mac_address(dhd_info_t *dhd, int ifidx, uint8 *addr)
 {
 	int ret;
-
+//	printk("[%s:%d] ifidx=%d,  addr = " MACDBG "\n", __func__, __LINE__, ifidx, MAC2STRDBG(addr));
 	ret = dhd_iovar(&dhd->pub, ifidx, "cur_etheraddr", (char *)addr,
 			ETHER_ADDR_LEN, NULL, 0, TRUE);
 	if (ret < 0) {
@@ -12672,7 +12674,7 @@ dhd_register_if(dhd_pub_t *dhdp, int ifidx, bool need_rtnl_lock)
 	memcpy(net->dev_addr, temp_addr, ETHER_ADDR_LEN);
 
 	if (ifidx == 0)
-		printf("%s\n", dhd_version);
+		printf("%s: Version: %s\n", __func__, dhd_version);
 #ifdef WL_EXT_IAPSTA
 	else
 		wl_ext_iapsta_attach_netdev(net, ifidx);
