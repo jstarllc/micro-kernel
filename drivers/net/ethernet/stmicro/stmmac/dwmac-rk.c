@@ -1344,13 +1344,13 @@ static struct rk_priv_data *rk_gmac_setup(struct platform_device *pdev,
 		bsp_priv->phy_reset = devm_reset_control_get(dev,
 				  "mac-phy");
 		if (IS_ERR(bsp_priv->phy_reset)) {
-			dev_info(dev, "no macphy_reset control found\n");
+			dev_info(dev, "[TNT] no macphy_reset control found\n");
 			bsp_priv->phy_reset = NULL;
 		}
 	} else {
 		bsp_priv->integrated_phy = false;
 	}
-	dev_info(dev, "integrated PHY? (%s).\n",  strings);
+	dev_info(dev, "[TNT] integrated PHY? (%s).\n",  strings);
 	// EJM END
 
 	ret = of_property_read_u32(dev->of_node, "tx_delay", &value);
@@ -1542,7 +1542,7 @@ int rk_devinfo_get_eth_mac(u8 *mac)
 	u8 eth_mac[6];
 
 
-	printk("[%s:%d] -------------\r\n", __FUNCTION__, __LINE__);
+	printk("[TNT] [%s:%d] -------------\r\n", __FUNCTION__, __LINE__);
 
 
 	old_fs = get_fs();
@@ -1554,13 +1554,13 @@ int rk_devinfo_get_eth_mac(u8 *mac)
 	filp = filp_open(WLAN_MAC_FILE, O_RDONLY,0);
 	if (IS_ERR(filp))
 	{
-		printk("[DWMAC] open %s failed.\r\n", WLAN_MAC_FILE);
+		printk("[TNT] [DWMAC] open %s failed.\r\n", WLAN_MAC_FILE);
 		return result;
 
 	}
 	else
 	{ 
-		printk("open %s success.\r\n", WLAN_MAC_FILE);
+		printk("[TNT] open %s success.\r\n", WLAN_MAC_FILE);
 
 		filp->f_pos = 0;
 
@@ -1587,7 +1587,7 @@ int rk_devinfo_get_eth_mac(u8 *mac)
 
 		result = 6;
 		
-		printk("[%s:%d] ---->>>>>>>>>>  mac address: %02x:%02x:%02x:%02x:%02x:%02x",
+		printk("[TNT] [%s:%d] ---->>>>>>>>>>  mac address: %02x:%02x:%02x:%02x:%02x:%02x",
 					__func__, __LINE__,  eth_mac[0], eth_mac[1], eth_mac[2],
 					eth_mac[3], eth_mac[4], eth_mac[5]);
 

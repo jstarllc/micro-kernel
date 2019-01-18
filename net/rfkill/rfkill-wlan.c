@@ -538,20 +538,20 @@ void *rockchip_wifi_cfg_open(void)
 	fp = filp_open(filename, O_RDONLY, 0);
 
 	 if (IS_ERR(fp)) {
-		 LOG("[ejm]%s: %s not found\n", __func__, filename);
+		 LOG("[TNT] [ejm]%s: %s not found\n", __func__, filename);
 		 fp = NULL;
 		 goto err;
 	 }
 
 	 if (!S_ISREG(file_inode(fp)->i_mode)) {
-		 LOG("%s: %s is not regular file\n", __func__, filename);
+		 LOG("[TNT] %s: %s is not regular file\n", __func__, filename);
 		 fp = NULL;
 		 goto err;
 	 }
 
 	 size = i_size_read(file_inode(fp));
 	 if (size <= 0) {
-		 LOG("%s: %s file size invalid %d\n", __func__, filename, size);
+		 LOG("[TNT] %s: %s file size invalid %d\n", __func__, filename, size);
 		 fp = NULL;
 		 goto err;
 	 }
@@ -596,7 +596,7 @@ void  trans_str2bin( char *src ,u8 * k)
 
 	if( (src == NULL) ||(strlen(src) < 17 ) )
 	{
-		printk( "Arg Error\n" );
+		printk( "[TNT] Arg Error\n" );
 		return ;
 	}
 
@@ -649,7 +649,7 @@ int rockchip_get_wifi_macStr(u8 *mac)
 	//u8 eth_mac[6];
 
 
-	printk("[WLAN-RFKILL EJM-1]%s:%d] -------------\r\n", __FUNCTION__, __LINE__);
+	printk("[TNT] [WLAN-RFKILL EJM-1]%s:%d] -------------\r\n", __FUNCTION__, __LINE__);
 
    	//msleep(10000);
 	old_fs = get_fs();
@@ -662,13 +662,13 @@ int rockchip_get_wifi_macStr(u8 *mac)
     //filp = rockchip_wifi_cfg_open();
 	if (! filp || IS_ERR(filp))
 	{
-		printk("[WLAN-RFKILL EJM] open %s failed.\r\n", WLAN_MAC_FILE);
+		printk("[TNT] [WLAN-RFKILL EJM] open %s failed.\r\n", WLAN_MAC_FILE);
 		return ret;
 
 	}
 	else
 	{ 
-		printk("open %s success.\r\n", WLAN_MAC_FILE);
+		printk("[TNT] open %s success.\r\n", WLAN_MAC_FILE);
 
 		filp->f_pos = 0;
 
@@ -676,11 +676,11 @@ int rockchip_get_wifi_macStr(u8 *mac)
         ret = vfs_read(filp, eth_mac, 17, &filp->f_pos);
         if (ret == 0)
         {
-        	printk("[WLAN-RFKILL EJM] [%s:%d] %d : %s\r\n", __FUNCTION__, __LINE__, (int)ret, eth_mac);
+        	printk("[TNT] [WLAN-RFKILL EJM] [%s:%d] %d : %s\r\n", __FUNCTION__, __LINE__, (int)ret, eth_mac);
 			 filp_close(filp, NULL);
 			 return ret;
         }
-    	printk("[WLAN-RFKILL-EJM] mac addr is  %s.\r\n", eth_mac);
+    	printk("[TNT] [WLAN-RFKILL-EJM] mac addr is  %s.\r\n", eth_mac);
 
 	    filp_close(filp, NULL);  /* filp_close(filp, current->files) ?  */
 	    /* restore kernel memory setting */
@@ -697,7 +697,7 @@ int rockchip_get_wifi_macStr(u8 *mac)
 #endif
 #endif
 
-		printk("[WLAN-RFKILL-EJM] [%s:%d] ---->>>>>>>>>>  mac address: %s\r\n", __func__, __LINE__,  eth_mac);
+		printk("[TNT] [WLAN-RFKILL-EJM] [%s:%d] ---->>>>>>>>>>  mac address: %s\r\n", __func__, __LINE__,  eth_mac);
 
 		memcpy(mac, eth_mac, strlen(eth_mac));
 	}
@@ -714,7 +714,7 @@ int rockchip_wifi_mac_addr(unsigned char *buf)
 	char mac_buf[20] = {0};
 
 	LOG("%s: enter.\n", __func__);
-//	printk("%s: enter.\n", __func__);
+//	printk("[TNT] %s: enter.\n", __func__);
 
 	memset(mac_buf, 0x00, sizeof(mac_buf));
 
@@ -724,7 +724,7 @@ int rockchip_wifi_mac_addr(unsigned char *buf)
 
 	if(getCount != 0)
 	{
-//		printk("%s: XXXXXXXXXXXXXXX--->>  custom mac=%s\n", __func__, mac_buf);
+//		printk("[TNT] %s: XXXXXXXXXXXXXXX--->>  custom mac=%s\n", __func__, mac_buf);
 
 		for(i = 0; i < 6; i++) {
 			mac_buf[(i * 3) + 2] = 0;
@@ -747,7 +747,7 @@ int rockchip_wifi_mac_addr(unsigned char *buf)
 	// from vendor storage
 	if (is_zero_ether_addr(wifi_custom_mac_addr)) {
 		if (get_wifi_addr_vendor(wifi_custom_mac_addr) != 0)
-			printk("%s: exit. Error: This mac address is unknown vendor.\n", __func__);
+			printk("[TNT] %s: exit. Error: This mac address is unknown vendor.\n", __func__);
 			return -1;
 	}
 
@@ -761,14 +761,14 @@ int rockchip_wifi_mac_addr(unsigned char *buf)
 		if (!strncmp(wifi_chip_type_string, "rtl", 3))
 			wifi_custom_mac_addr[0] &= ~0x2; // for p2p
 	} else {
-		printk("%s: exit. Error: This mac address is not valid.\n", __func__);
+		printk("[TNT] %s: exit. Error: This mac address is not valid.\n", __func__);
 		LOG("This mac address is not valid, ignored...\n");
 		return -1;
 	}
 
 	memcpy(buf, wifi_custom_mac_addr, 6);
 
-//	printk("[%s:%d] exit. Success: "MACDBG"\n", __func__,	__LINE__, MAC2STRDBG(buf));
+//	printk("[TNT] [%s:%d] exit. Success: "MACDBG"\n", __func__,	__LINE__, MAC2STRDBG(buf));
 
 
 //	msleep(10);

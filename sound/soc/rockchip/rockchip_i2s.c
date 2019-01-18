@@ -64,7 +64,7 @@ static int i2s_runtime_suspend(struct device *dev)
 {
 	struct rk_i2s_dev *i2s = dev_get_drvdata(dev);
 
-	dev_err(i2s->dev, "i2s_runtime_suspend\n");
+	dev_err(i2s->dev, "[TNT] i2s_runtime_suspend\n");
 
 #if (CLK_ALWAYS_ON == 0)
 	regcache_cache_only(i2s->regmap, true);
@@ -78,7 +78,7 @@ static int i2s_runtime_resume(struct device *dev)
 	struct rk_i2s_dev *i2s = dev_get_drvdata(dev);
 	int ret;
 
-	dev_err(i2s->dev, "i2s_runtime_resume\n");
+	dev_err(i2s->dev, "[TNT] i2s_runtime_resume\n");
 
 	ret = clk_prepare_enable(i2s->mclk);
 	if (ret) {
@@ -355,7 +355,7 @@ static int rockchip_i2s_hw_params(struct snd_pcm_substream *substream,
 
 // EJM TnT added this
 #if 1
-		dev_err(i2s->dev, "mclk:%d, bclk:%d, dbclk:%d, dlrck:%d\n", 
+		dev_err(i2s->dev, "[TNT] mclk:%d, bclk:%d, dbclk:%d, dlrck:%d\n", 
 			mclk_rate, bclk_rate, div_bclk, div_lrck);
 #endif
 	}
@@ -377,7 +377,7 @@ static int rockchip_i2s_hw_params(struct snd_pcm_substream *substream,
 		val |= I2S_TXCR_VDW(32);
 		break;
 	default:
-		dev_err(i2s->dev, "invalid format: %d\n",
+		dev_err(i2s->dev, "[TNT] invalid format: %d\n",
 			params_format(params));
 		return -EINVAL;
 	}
@@ -786,7 +786,7 @@ static int rockchip_i2s_suspend(struct device *dev)
 {
 	struct rk_i2s_dev *i2s = dev_get_drvdata(dev);
 
-	dev_err(i2s->dev, "rockchip_i2s_suspend\n");
+	dev_err(i2s->dev, "[TNT] rockchip_i2s_suspend\n");
 
 	regcache_mark_dirty(i2s->regmap);
 
@@ -798,7 +798,7 @@ static int rockchip_i2s_resume(struct device *dev)
 	struct rk_i2s_dev *i2s = dev_get_drvdata(dev);
 	int ret;
 
-	dev_err(i2s->dev, "rockchip_i2s_resume\n");
+	dev_err(i2s->dev, "[TNT] rockchip_i2s_resume\n");
 
 	ret = pm_runtime_get_sync(dev);
 	if (ret < 0)

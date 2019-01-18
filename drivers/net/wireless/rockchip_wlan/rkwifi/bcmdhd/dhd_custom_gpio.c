@@ -108,7 +108,7 @@ dhd_custom_get_mac_address(void *adapter, unsigned char *buf)
 {
 	int ret = 0;
 
-//	printk("[%s:%d] <-----------------\n", __FUNCTION__, __LINE__);
+//	printk("[TNT] [%s:%d] <-----------------\n", __FUNCTION__, __LINE__);
 	WL_TRACE(("%s Enter\n", __FUNCTION__));
 	if (!buf)
 		return -EINVAL;

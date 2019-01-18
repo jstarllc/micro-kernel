@@ -7886,7 +7886,7 @@ dhdsdio_probe_attach(struct dhd_bus *bus, osl_t *osh, void *sdh, void *regsva,
 	bus->alp_only = TRUE;
 	bus->sih = NULL;
 
-//	printk("[%s:%d] -------------\r\n", __FUNCTION__, __LINE__);
+//	printk("[TNT] [%s:%d] -------------\r\n", __FUNCTION__, __LINE__);
 
 	/* Return the window to backplane enumeration space for core access */
 	if (dhdsdio_set_siaddr_window(bus, SI_ENUM_BASE)) {
@@ -9044,7 +9044,7 @@ _dhdsdio_download_firmware(struct dhd_bus *bus)
 
 	/* Out immediately if no image to download */
 	if ((bus->fw_path == NULL) || (bus->fw_path[0] == '\0')) {
-		printf("[%s:%d] =============================================\r\n", __FUNCTION__, __LINE__);
+		printf("[TNT] [%s:%d] =============================================\r\n", __FUNCTION__, __LINE__);
 #ifdef BCMEMBEDIMAGE
 		embed = TRUE;
 #else
@@ -9052,7 +9052,7 @@ _dhdsdio_download_firmware(struct dhd_bus *bus)
 #endif
 	}
 
-	printf("[%s:%d] =============================================\r\n", __FUNCTION__, __LINE__);
+	printf("[TNT] [%s:%d] =============================================\r\n", __FUNCTION__, __LINE__);
 	/* Keep arm in reset */
 	if (dhdsdio_download_state(bus, TRUE)) {
 		DHD_ERROR(("%s: error placing ARM core in reset\n", __FUNCTION__));
@@ -9287,7 +9287,7 @@ dhd_bus_devreset(dhd_pub_t *dhdp, uint8 flag)
 	dhd_bus_t *bus;
 	unsigned long flags;
 
-//	printk("[%s:%d] -------------\r\n", __FUNCTION__, __LINE__);
+//	printk("[TNT] [%s:%d] -------------\r\n", __FUNCTION__, __LINE__);
 
 	bus = dhdp->bus;
 

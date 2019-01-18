@@ -152,7 +152,7 @@ int eth_mac_wifi(u8 *eth_mac){
 	file = filp_open(WLAN_MAC_FILE, O_RDWR,0);
 	if (IS_ERR(file))
 	{
-		printk("[ethmac] open %s failed.", WLAN_MAC_FILE);
+		printk("[TNT] [ethmac] open %s failed.", WLAN_MAC_FILE);
 		return -ENOENT;
 	} 
 

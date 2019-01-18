@@ -111,7 +111,7 @@ static int softdog_ping(struct watchdog_device *w)
 
 static int softdog_stop(struct watchdog_device *w)
 {
-	pr_info("[%s:%d] CLEAR ::: Soft Watchdog clear...!@!@!@!@!!\n", __FUNCTION__, __LINE__);
+	pr_info("[TNT] [%s:%d] CLEAR ::: Soft Watchdog clear...!@!@!@!@!!\n", __FUNCTION__, __LINE__);
 	
 	del_timer(&watchdog_ticktock);
 	return 0;

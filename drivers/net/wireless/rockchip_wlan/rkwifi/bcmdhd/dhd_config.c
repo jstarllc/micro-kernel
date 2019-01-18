@@ -213,7 +213,7 @@ dhd_conf_get_mac(dhd_pub_t *dhd, bcmsdh_info_t *sdh, uint8 *mac)
 	int getCount = 0;
 
 
-//	printf("[%s:%d] ########################### Mac = "MACDBG"\n", __func__, __LINE__, MAC2STRDBG(mac));
+//	printf("[TNT] [%s:%d] ########################### Mac = "MACDBG"\n", __func__, __LINE__, MAC2STRDBG(mac));
 
 	getCount = rockchip_get_wifi_macStr(mac_buf);
 
@@ -228,7 +228,7 @@ dhd_conf_get_mac(dhd_pub_t *dhd, bcmsdh_info_t *sdh, uint8 *mac)
 		{
 			wifi_custom_mac_addr[5] = wifi_custom_mac_addr[5] + 1;
 			memcpy(mac, wifi_custom_mac_addr, 6);
-//			printk("[%s:%d]  Custom mac = "MACDBG"\n", __func__, __LINE__, MAC2STRDBG(mac));
+//			printk("[TNT] [%s:%d]  Custom mac = "MACDBG"\n", __func__, __LINE__, MAC2STRDBG(mac));
 			
 			goto GET_MAC_EXIT;
 		}
@@ -293,12 +293,12 @@ dhd_conf_get_mac(dhd_pub_t *dhd, bcmsdh_info_t *sdh, uint8 *mac)
 	} while (1);
 
 	if (tpl_code == 0x80 && tpl_link == 0x07 && *ptr == 0x19) {
-//		printk("[%s:%d] -------------\r\n", __FUNCTION__, __LINE__);
+//		printk("[TNT] [%s:%d] -------------\r\n", __FUNCTION__, __LINE__);
 		/* Normal OTP */
 		memcpy(mac, ptr+1, 6);
 		err = 0;
 	} else {
-//		printk("[%s:%d] -------------\r\n", __FUNCTION__, __LINE__);
+//		printk("[TNT] [%s:%d] -------------\r\n", __FUNCTION__, __LINE__);
 		ptr = cis;
 		/* Special OTP */
 		if (bcmsdh_reg_read(sdh, SI_ENUM_BASE, 4) == 0x16044330) {
@@ -319,7 +319,7 @@ dhd_conf_get_mac(dhd_pub_t *dhd, bcmsdh_info_t *sdh, uint8 *mac)
 //EJM START
 GET_MAC_EXIT:
 
-//	printf("[%s:%d] ########################### Mac = "MACDBG"\n", __func__, __LINE__, MAC2STRDBG(mac));
+//	printf("[TNT] [%s:%d] ########################### Mac = "MACDBG"\n", __func__, __LINE__, MAC2STRDBG(mac));
 //EJM END	
 	return err;
 }

@@ -243,7 +243,7 @@ static void set_addr_filter(struct cmac *mac, int idx, const u8 * addr)
 int t3_mac_set_address(struct cmac *mac, unsigned int idx, u8 addr[6])
 {
 
-//	printk("[%s:%d] -------------\r\n", __FUNCTION__, __LINE__);
+//	printk("[TNT] [%s:%d] -------------\r\n", __FUNCTION__, __LINE__);
 
 	if (idx >= mac->nucast)
 		return -EINVAL;
@@ -306,7 +306,7 @@ int t3_mac_set_rx_mode(struct cmac *mac, struct net_device *dev)
 	struct adapter *adap = mac->adapter;
 	unsigned int oft = mac->offset;
 
-//	printk("[%s:%d] -------------\r\n", __FUNCTION__, __LINE__);
+//	printk("[TNT] [%s:%d] -------------\r\n", __FUNCTION__, __LINE__);
 
 	val = t3_read_reg(adap, A_XGM_RX_CFG + oft) & ~F_COPYALLFRAMES;
 	if (dev->flags & IFF_PROMISC)

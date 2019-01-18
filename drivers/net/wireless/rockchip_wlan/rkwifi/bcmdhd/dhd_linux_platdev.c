@@ -280,19 +280,19 @@ int wifi_platform_get_mac_addr(wifi_adapter_info_t *adapter, unsigned char *buf)
 {
 	struct wifi_platform_data *plat_data;
 
-//	printk("[%s:%d] <-----------------\n", __FUNCTION__, __LINE__);
+//	printk("[TNT] [%s:%d] <-----------------\n", __FUNCTION__, __LINE__);
 
 	DHD_ERROR(("%s\n", __FUNCTION__));
 	if (!buf || !adapter || !adapter->wifi_plat_data)
 	{
-//		printk("[%s:%d] ----------------->\n", __FUNCTION__, __LINE__); //EJM ADDED
+//		printk("[TNT] [%s:%d] ----------------->\n", __FUNCTION__, __LINE__); //EJM ADDED
 		return -EINVAL;
 	}
 	plat_data = adapter->wifi_plat_data;
 	if (plat_data->get_mac_addr) {
 		return plat_data->get_mac_addr(buf);
 	}
-//	printk("[%s:%d] ----------------->\n", __FUNCTION__, __LINE__);
+//	printk("[TNT] [%s:%d] ----------------->\n", __FUNCTION__, __LINE__);
 
 	return -EOPNOTSUPP;
 }
