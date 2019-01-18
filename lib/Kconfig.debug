@@ -875,7 +875,7 @@ config PANIC_ON_OOPS_VALUE
 
 config PANIC_TIMEOUT
 	int "panic timeout"
-	default 0
+	default 1
 	help
 	  Set the timeout value (in seconds) until a reboot occurs when the
 	  the kernel panics. If n = 0, then we wait forever. A timeout

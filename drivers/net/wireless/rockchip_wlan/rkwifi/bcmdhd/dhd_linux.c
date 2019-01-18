@@ -36,6 +36,8 @@
 #include <event_log.h>
 #endif /* SHOW_LOGTRACE */
 
+#include <linux/rfkill-wlan.h> //EJM ADDED
+
 #include <linux/init.h>
 #include <linux/kernel.h>
 #include <linux/slab.h>
@@ -4080,7 +4082,7 @@ int
 _dhd_set_mac_address(dhd_info_t *dhd, int ifidx, uint8 *addr)
 {
 	int ret;
-
+//	printk("[TNT] [%s:%d] ifidx=%d,  addr = " MACDBG "\n", __func__, __LINE__, ifidx, MAC2STRDBG(addr));
 	ret = dhd_iovar(&dhd->pub, ifidx, "cur_etheraddr", (char *)addr,
 			ETHER_ADDR_LEN, NULL, 0, TRUE);
 	if (ret < 0) {
@@ -12672,7 +12674,7 @@ dhd_register_if(dhd_pub_t *dhdp, int ifidx, bool need_rtnl_lock)
 	memcpy(net->dev_addr, temp_addr, ETHER_ADDR_LEN);
 
 	if (ifidx == 0)
-		printf("%s\n", dhd_version);
+		printf("[TNT] %s: Version: %s\n", __func__, dhd_version);
 #ifdef WL_EXT_IAPSTA
 	else
 		wl_ext_iapsta_attach_netdev(net, ifidx);

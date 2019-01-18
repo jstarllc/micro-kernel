@@ -80,6 +80,10 @@ enum {
     TYPE_MAX,
 };
 
+//EJM START
+extern u8 wifi_custom_mac_addr[6];
+//EJM END
+
 int rfkill_get_wifi_power_state(int *power, int *vref_ctrl_enable);
 void *rockchip_mem_prealloc(int section, unsigned long size);
 int rockchip_wifi_ref_voltage(int on);
@@ -89,5 +93,6 @@ int rockchip_wifi_get_oob_irq(void);
 int rockchip_wifi_get_oob_irq_flag(void);
 int rockchip_wifi_reset(int on);
 int rockchip_wifi_mac_addr(unsigned char *buf);
+int rockchip_get_wifi_macStr(u8 *mac); //EJM ADDED
 void *rockchip_wifi_country_code(char *ccode);
 #endif

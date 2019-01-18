@@ -12,6 +12,10 @@
 #include <sbchipc.h>
 #endif
 
+//EJM START
+#include <linux/rfkill-wlan.h>
+//EJM END
+
 #include <dhd_config.h>
 #include <dhd_dbg.h>
 
@@ -204,6 +208,43 @@ dhd_conf_get_mac(dhd_pub_t *dhd, bcmsdh_info_t *sdh, uint8 *mac)
 	uint8 header[3] = {0x80, 0x07, 0x19};
 	uint8 *cis;
 
+//EJM start TnT
+	char mac_buf[20] = {0};
+	int getCount = 0;
+
+
+//	printf("[TNT] [%s:%d] ########################### Mac = "MACDBG"\n", __func__, __LINE__, MAC2STRDBG(mac));
+
+	getCount = rockchip_get_wifi_macStr(mac_buf);
+
+	if(getCount != 0)
+	{
+		for(i = 0; i < 6; i++) {
+			mac_buf[(i * 3) + 2] = 0;
+			wifi_custom_mac_addr[i] = (u8) simple_strtol(&mac_buf[i * 3], NULL, 16);
+		}
+
+		if( (!is_zero_ether_addr(wifi_custom_mac_addr)) && (wifi_custom_mac_addr[5] != 0xFF) )
+		{
+			wifi_custom_mac_addr[5] = wifi_custom_mac_addr[5] + 1;
+			memcpy(mac, wifi_custom_mac_addr, 6);
+//			printk("[TNT] [%s:%d]  Custom mac = "MACDBG"\n", __func__, __LINE__, MAC2STRDBG(mac));
+			
+			goto GET_MAC_EXIT;
+		}
+		else
+		{
+			memset(wifi_custom_mac_addr, 0, 6);
+		}
+	}
+	else
+	{
+
+	}
+
+//EJM end TnT
+
+
 	if (!(cis = MALLOC(dhd->osh, SBSDIO_CIS_SIZE_LIMIT))) {
 		CONFIG_ERROR(("%s: cis malloc failed\n", __FUNCTION__));
 		return err;
@@ -252,10 +293,12 @@ dhd_conf_get_mac(dhd_pub_t *dhd, bcmsdh_info_t *sdh, uint8 *mac)
 	} while (1);
 
 	if (tpl_code == 0x80 && tpl_link == 0x07 && *ptr == 0x19) {
+//		printk("[TNT] [%s:%d] -------------\r\n", __FUNCTION__, __LINE__);
 		/* Normal OTP */
 		memcpy(mac, ptr+1, 6);
 		err = 0;
 	} else {
+//		printk("[TNT] [%s:%d] -------------\r\n", __FUNCTION__, __LINE__);
 		ptr = cis;
 		/* Special OTP */
 		if (bcmsdh_reg_read(sdh, SI_ENUM_BASE, 4) == 0x16044330) {
@@ -273,6 +316,11 @@ dhd_conf_get_mac(dhd_pub_t *dhd, bcmsdh_info_t *sdh, uint8 *mac)
 	ASSERT(cis);
 	MFREE(dhd->osh, cis, SBSDIO_CIS_SIZE_LIMIT);
 
+//EJM START
+GET_MAC_EXIT:
+
+//	printf("[TNT] [%s:%d] ########################### Mac = "MACDBG"\n", __func__, __LINE__, MAC2STRDBG(mac));
+//EJM END	
 	return err;
 }
 

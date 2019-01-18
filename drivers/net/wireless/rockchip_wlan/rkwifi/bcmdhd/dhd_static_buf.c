@@ -54,6 +54,9 @@ enum dhd_prealloc_index {
 #define DHD_PREALLOC_WIPHY_ESCAN0_SIZE	(64 * 1024)
 #define DHD_PREALLOC_DHD_INFO_SIZE	(30 * 1024)
 #define DHD_PREALLOC_MEMDUMP_RAM_SIZE	(810 * 1024)
+//EJM TnT has this as below 
+//#define DHD_PREALLOC_DHD_WLFC_HANGER_SIZE	(64 * 1024)
+//EJM but TnT's was net new. I bet 73 is better. 
 #define DHD_PREALLOC_DHD_WLFC_HANGER_SIZE	(73 * 1024)
 #define DHD_PREALLOC_WL_ESCAN_INFO_SIZE	(66 * 1024)
 #ifdef CONFIG_64BIT

@@ -85,7 +85,53 @@
 		reset-gpios = <&gpio1 18 GPIO_ACTIVE_LOW>;
 	};
 
-	sound {
+	//sound {
+	//	compatible = "simple-audio-card";
+	//	simple-audio-card,format = "i2s";
+	//	simple-audio-card,mclk-fs = <256>;
+	//	simple-audio-card,name = "rockchip,rk3328";
+	//	simple-audio-card,cpu {
+	//		sound-dai = <&i2s1>;
+	//	};
+	//	simple-audio-card,codec {
+	//		sound-dai = <&codec>;
+	//	};
+	//};
+	tnt-led{
+		compatible = "tnt,led";
+		led-scl = <&gpio3 RK_PB0 GPIO_ACTIVE_LOW>;
+		led-sda = <&gpio3 RK_PA1 GPIO_ACTIVE_LOW>;
+		led-rst = <&gpio1 RK_PA6 GPIO_ACTIVE_LOW>;
+		status = "okay";
+	};
+
+	tnt-io{
+		compatible = "tnt,io";
+		io-pir = <&gpio0 RK_PA0 IRQ_TYPE_EDGE_BOTH>;
+		io-scl = <&gpio1 RK_PA0 GPIO_ACTIVE_LOW>;
+		io-sda = <&gpio1 RK_PA1 GPIO_ACTIVE_LOW>;
+		io-rst = <&gpio1 RK_PA4 GPIO_ACTIVE_LOW>;
+		io-mot = <&gpio1 RK_PA5 GPIO_ACTIVE_HIGH>;
+		io-int = <&gpio1 RK_PA2 IRQ_TYPE_EDGE_FALLING>;
+		status = "okay";
+	};
+
+	cnxt-sound {
+		compatible = "simple-audio-card";
+		simple-audio-card,format = "i2s";
+		simple-audio-card,bitclock-master = <&codec_dai>;
+		simple-audio-card,frame-master = <&codec_dai>;
+		simple-audio-card,mclk-fs = <128>;
+		simple-audio-card,name = "cnxt,cx20921";
+		cpu_dai: simple-audio-card,cpu {
+			sound-dai = <&i2s2>;
+		};
+		codec_dai: simple-audio-card,codec {
+			sound-dai = <&i2c0_cx20921>;
+		};
+	};
+
+	rk-sound {
 		compatible = "simple-audio-card";
 		simple-audio-card,format = "i2s";
 		simple-audio-card,mclk-fs = <256>;
@@ -94,22 +140,22 @@
 			sound-dai = <&i2s1>;
 		};
 		simple-audio-card,codec {
-			sound-dai = <&codec>;
+			sound-dai = <&rk_codec>;
 		};
 	};
 
-	hdmi-sound {
-		compatible = "simple-audio-card";
-		simple-audio-card,format = "i2s";
-		simple-audio-card,mclk-fs = <128>;
-		simple-audio-card,name = "rockchip,hdmi";
-		simple-audio-card,cpu {
-			sound-dai = <&i2s0>;
-		};
-		simple-audio-card,codec {
-			sound-dai = <&hdmi>;
-		};
-	};
+	//hdmi-sound {
+	//	compatible = "simple-audio-card";
+	//	simple-audio-card,format = "i2s";
+	//	simple-audio-card,mclk-fs = <128>;
+	//	simple-audio-card,name = "rockchip,hdmi";
+	//	simple-audio-card,cpu {
+	//		sound-dai = <&i2s0>;
+	//	};
+	//	simple-audio-card,codec {
+	//		sound-dai = <&hdmi>;
+	//	};
+	//};
 
 	spdif-sound {
 		compatible = "simple-audio-card";
@@ -160,7 +206,7 @@
 		compatible = "regulator-fixed";
 		gpio = <&gpio0 30 GPIO_ACTIVE_LOW>;
 		pinctrl-names = "default";
-		pinctrl-0 = <&sdmmc0m1_gpio>;
+		//pinctrl-0 = <&sdmmc0m1_gpio>;	// 170711--
 		regulator-name = "vcc_sd";
 		regulator-min-microvolt = <3300000>;
 		regulator-max-microvolt = <3300000>;
@@ -177,14 +223,19 @@
 	wireless-wlan {
 		compatible = "wlan-platdata";
 		rockchip,grf = <&grf>;
-		wifi_chip_type = "ap6354";
+		wifi_chip_type = "ap6255";
 		sdio_vref = <1800>;
 		WIFI,host_wake_irq = <&gpio1 19 GPIO_ACTIVE_HIGH>;
 		status = "okay";
 	};
 };
 
-&codec {
+&wdt {
+rockchip,timeout = <60>;
+status = "okay";
+};
+
+&rk_codec {
 	#sound-dai-cells = <0>;
 	status = "okay";
 };
@@ -243,13 +294,25 @@
 
 &hdmi {
 	#sound-dai-cells = <0>;
-	ddc-i2c-scl-high-time-ns = <9625>;
-	ddc-i2c-scl-low-time-ns = <10000>;
+	//ddc-i2c-scl-high-time-ns = <9625>;
+	//ddc-i2c-scl-low-time-ns = <10000>;
 	status = "okay";
 };
 
 &hdmiphy {
 	status = "okay";
+};
+
+&i2c0 {
+	status = "okay";
+
+	i2c0_cx20921:i2c0-cx20921@41 {
+		#sound-dai-cells = <0>;
+		compatible = "cnxt,cx20921";
+		reg = <0x41>;
+		rockchip,grf = <&grf>;
+		reset-gpios = <&gpio1 RK_PD1 GPIO_ACTIVE_HIGH>;
+	};
 };
 
 &i2c1 {
@@ -389,17 +452,23 @@
 	};
 };
 
-&h265e {
-	status = "okay";
-};
+//&h265e {
+//	status = "okay";
+//};
 
 &i2s0 {
 	#sound-dai-cells = <0>;
-	rockchip,bclk-fs = <128>;
+	rockchip,bclk-fs = <64>;
 	status = "okay";
 };
 
 &i2s1 {
+	#sound-dai-cells = <0>;
+	rockchip,bclk-fs = <64>;
+	status = "okay";
+};
+
+&i2s2 {
 	#sound-dai-cells = <0>;
 	status = "okay";
 };
@@ -569,7 +638,7 @@
 	max-frequency = <150000000>;
 	num-slots = <1>;
 	pinctrl-names = "default";
-	pinctrl-0 = <&sdmmc0_clk &sdmmc0_cmd &sdmmc0_dectn &sdmmc0_bus4>;
+	pinctrl-0 = <&sdmmc0_cmd &sdmmc0_bus4>;
 	supports-sd;
 	status = "okay";
 	vmmc-supply = <&vcc_sd>;
@@ -611,6 +680,7 @@
 };
 
 &usb20_otg {
+	dr_mode = "peripheral";		// 170622++
 	status = "okay";
 };
 
@@ -630,9 +700,9 @@
 	status = "okay";
 };
 
-&vepu {
-	status = "okay";
-};
+//&vepu {
+//	status = "okay";
+//};
 
 &vop {
 	status = "okay";
@@ -642,6 +712,17 @@
 	status = "okay";
 };
 
+// added 170622
+//&vpu_combo {
+//	status = "okay";
+//};
+
+// added 170711
 &vpu_service {
 	status = "okay";
 };
+
+// added 170711
+//&tve {
+//	status = "okay";
+//};

@@ -49,7 +49,7 @@
 #include <linux/jiffies.h>
 #include <linux/kernel.h>
 
-#define TIMER_MARGIN	60		/* Default is 60 seconds */
+#define TIMER_MARGIN	120		/* Default is 60 seconds */
 static unsigned int soft_margin = TIMER_MARGIN;	/* in seconds */
 module_param(soft_margin, uint, 0);
 MODULE_PARM_DESC(soft_margin,
@@ -111,6 +111,8 @@ static int softdog_ping(struct watchdog_device *w)
 
 static int softdog_stop(struct watchdog_device *w)
 {
+	pr_info("[TNT] [%s:%d] CLEAR ::: Soft Watchdog clear...!@!@!@!@!!\n", __FUNCTION__, __LINE__);
+	
 	del_timer(&watchdog_ticktock);
 	return 0;
 }
@@ -190,6 +192,9 @@ static int __init watchdog_init(void)
 
 	pr_info("Software Watchdog Timer: 0.08 initialized. soft_noboot=%d soft_margin=%d sec soft_panic=%d (nowayout=%d)\n",
 		soft_noboot, soft_margin, soft_panic, nowayout);
+
+	softdog_ping(&softdog_dev);
+
 
 	return 0;
 }

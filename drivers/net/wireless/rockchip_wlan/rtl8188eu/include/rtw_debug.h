@@ -331,6 +331,23 @@ extern uint rtw_drv_log_level;
 #endif /* defined(_seqdump) */
 
 
+// EJM What actually is this. Useful?
+#if 1
+
+	#undef DBG_871X
+	#undef MSG_8192C
+	#undef DBG_8192C
+	#undef DBG_871X_LEVEL
+	
+	#define DBG_871X(x, ...) do {} while(0)
+	#define MSG_8192C(x, ...) do {} while(0)
+	#define DBG_8192C(x,...) do {} while(0)
+	#define DBG_871X_LEVEL(x,...) do {} while(0)
+#endif
+
+//EJM END
+
+
 #ifdef CONFIG_DBG_COUNTER
 	#define DBG_COUNTER(counter) counter++
 #else

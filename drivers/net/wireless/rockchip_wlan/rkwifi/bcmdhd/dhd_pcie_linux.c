@@ -1218,6 +1218,9 @@ int dhdpcie_init(struct pci_dev *pdev)
 #ifdef BCMPCIE_OOB_HOST_WAKE
 	dhdpcie_os_info_t	*dhdpcie_osinfo = NULL;
 #endif /* BCMPCIE_OOB_HOST_WAKE */
+
+//	printk("[TNT] [%s:%d] <-------------\n", __FUNCTION__, __LINE__);
+
 #ifdef USE_SMMU_ARCH_MSM
 	dhdpcie_smmu_info_t	*dhdpcie_smmu_info = NULL;
 #endif /* USE_SMMU_ARCH_MSM */

@@ -74,10 +74,7 @@ int eth_mac_idb(u8 *eth_mac)
 }
 
 #if 0
-/**
-*大写转小写
-*
-*/
+
 static void   to_lower(char   *str) 
 { 
 	int   i=0; 
@@ -89,12 +86,8 @@ static void   to_lower(char   *str)
 	} 
 } 
 
-/**
-  *字符串格式转为mac 格式.
-  *
-  *
-  */
-static void  trans( char *src ,int * k) 
+
+static void  trans( char *src ,int * k) w
 {
     char c;
     int i;
@@ -159,7 +152,7 @@ int eth_mac_wifi(u8 *eth_mac){
 	file = filp_open(WLAN_MAC_FILE, O_RDWR,0);
 	if (IS_ERR(file))
 	{
-		printk("open %s failed.", WLAN_MAC_FILE);
+		printk("[TNT] [ethmac] open %s failed.", WLAN_MAC_FILE);
 		return -ENOENT;
 	} 
 
@@ -171,7 +164,8 @@ int eth_mac_wifi(u8 *eth_mac){
     
     	set_fs(old_fs);
     
-   	 if(ret > 0){
+   	 if(ret > 0)
+	 {
         	//printk("mac read from %s: %s\n", WLAN_MAC_FILE,wifi_mac);
 
 		to_lower(wifi_mac);

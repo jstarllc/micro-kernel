@@ -127,11 +127,13 @@ static int pcf85063_set_datetime(struct i2c_client *client, struct rtc_time *tm)
 
 static int pcf85063_rtc_read_time(struct device *dev, struct rtc_time *tm)
 {
+	printk("[%s:%d] read rtc..!@\r\n", __FUNCTION__, __LINE__);
 	return pcf85063_get_datetime(to_i2c_client(dev), tm);
 }
 
 static int pcf85063_rtc_set_time(struct device *dev, struct rtc_time *tm)
-{
+{	
+	printk("[%s:%d] set rtc..!@\r\n", __FUNCTION__, __LINE__);
 	return pcf85063_set_datetime(to_i2c_client(dev), tm);
 }
 
@@ -147,8 +149,12 @@ static int pcf85063_probe(struct i2c_client *client,
 
 	dev_dbg(&client->dev, "%s\n", __func__);
 
-	if (!i2c_check_functionality(client->adapter, I2C_FUNC_I2C))
+	//if (!i2c_check_functionality(client->adapter, I2C_FUNC_I2C))
+	if (!i2c_check_functionality(client->adapter, I2C_FUNC_SLAVE))
+	{
+		printk("[%s:%d] Fail, init rtc..!@\r\n", __FUNCTION__, __LINE__);
 		return -ENODEV;
+	}
 
 	pcf85063 = devm_kzalloc(&client->dev, sizeof(struct pcf85063),
 				GFP_KERNEL);
@@ -162,6 +168,9 @@ static int pcf85063_probe(struct i2c_client *client,
 	pcf85063->rtc = devm_rtc_device_register(&client->dev,
 				pcf85063_driver.driver.name,
 				&pcf85063_rtc_ops, THIS_MODULE);
+
+	printk("[%s:%d] success, init rtc..!@\r\n", __FUNCTION__, __LINE__);
+
 
 	return PTR_ERR_OR_ZERO(pcf85063->rtc);
 }
