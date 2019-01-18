@@ -645,7 +645,7 @@ int rockchip_get_wifi_macStr(u8 *mac)
 	
 	struct  file *filp = NULL;
 	char eth_mac[32];
-	//mm_segment_t old_fs;
+	mm_segment_t old_fs;
 	//u8 eth_mac[6];
 
 
