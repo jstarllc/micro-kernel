@@ -660,7 +660,7 @@ int rockchip_get_wifi_macStr(u8 *mac)
         ret = vfs_read(filp, eth_mac, 17, &filp->f_pos);
         if (ret == 0)
         {
-        	printk("[TNT] [WLAN-RFKILL EJM] [%s:%d] %d Read: %s\r\n", __FUNCTION__, __LINE__, (int)ret, eth_mac);
+			printk("[TNT] [WLAN-RFKILL EJM] [%s:%d] %d Read: %s\r\n", __FUNCTION__, __LINE__, (int)ret, eth_mac);
 			filp_close(filp, NULL);
 			return ret;
         }
