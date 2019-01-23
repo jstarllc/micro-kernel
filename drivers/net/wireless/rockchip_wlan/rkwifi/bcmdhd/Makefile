@@ -138,7 +138,6 @@ endif
 
 DHDCFLAGS += -DGET_CUSTOM_MAC_ENABLE
 
-
 ifeq ($(CONFIG_BCMDHD_AG),y)
 	DHDCFLAGS += -DBAND_AG
 endif
