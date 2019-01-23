@@ -639,52 +639,34 @@ void  trans_str2bin( char *src ,u8 * k)
 int rockchip_get_wifi_macStr(u8 *mac)
 {
 	ssize_t ret = 0;
-
-	//char filename[] = "/system/etc/firmware/mac_address.txt";
-
-	
 	struct  file *filp = NULL;
 	char eth_mac[32];
 	mm_segment_t old_fs;
-	//u8 eth_mac[6];
 
-
-	printk("[TNT] [WLAN-RFKILL EJM-1]%s:%d] -------------\r\n", __FUNCTION__, __LINE__);
-
-   	//msleep(10000);
 	old_fs = get_fs();
-    	set_fs(KERNEL_DS);
-    
-    	memset(eth_mac, 0, 32);
-	//memset(eth_mac, 0, 6);
+	set_fs(KERNEL_DS);
+	memset(eth_mac, 0, 32);
 	
 	filp = filp_open(WLAN_MAC_FILE, O_RDONLY,0);
-    //filp = rockchip_wifi_cfg_open();
 	if (! filp || IS_ERR(filp))
 	{
 		printk("[TNT] [WLAN-RFKILL EJM] open %s failed.\r\n", WLAN_MAC_FILE);
 		return ret;
-
 	}
 	else
 	{ 
 		printk("[TNT] open %s success.\r\n", WLAN_MAC_FILE);
-
 		filp->f_pos = 0;
-
-    
-        ret = vfs_read(filp, eth_mac, 17, &filp->f_pos);
-        if (ret == 0)
-        {
-        	printk("[TNT] [WLAN-RFKILL EJM] [%s:%d] %d : %s\r\n", __FUNCTION__, __LINE__, (int)ret, eth_mac);
-			 filp_close(filp, NULL);
-			 return ret;
-        }
-    	printk("[TNT] [WLAN-RFKILL-EJM] mac addr is  %s.\r\n", eth_mac);
-
-	    filp_close(filp, NULL);  /* filp_close(filp, current->files) ?  */
-	    /* restore kernel memory setting */
-	    set_fs(old_fs);
+		ret = vfs_read(filp, eth_mac, 17, &filp->f_pos);
+		if (ret == 0)
+		{
+			printk("[TNT] [WLAN-RFKILL EJM] [%s:%d] %d Read: %s\r\n", __FUNCTION__, __LINE__, (int)ret, eth_mac);
+			filp_close(filp, NULL);
+			return ret;
+		}
+		filp_close(filp, NULL);  /* filp_close(filp, current->files) ?  */
+		/* restore kernel memory setting */
+		set_fs(old_fs);
 
 #if 0
 #if 1
@@ -696,9 +678,7 @@ int rockchip_get_wifi_macStr(u8 *mac)
 		trans_str2bin(wifi_mac, eth_mac);
 #endif
 #endif
-
 		printk("[TNT] [WLAN-RFKILL-EJM] [%s:%d] ---->>>>>>>>>>  mac address: %s\r\n", __func__, __LINE__,  eth_mac);
-
 		memcpy(mac, eth_mac, strlen(eth_mac));
 	}
 
