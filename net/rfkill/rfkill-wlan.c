@@ -657,16 +657,16 @@ int rockchip_get_wifi_macStr(u8 *mac)
 	{ 
 		printk("[TNT] open %s success.\r\n", WLAN_MAC_FILE);
 		filp->f_pos = 0;
-        ret = vfs_read(filp, eth_mac, 17, &filp->f_pos);
-        if (ret == 0)
-        {
+		ret = vfs_read(filp, eth_mac, 17, &filp->f_pos);
+		if (ret == 0)
+		{
 			printk("[TNT] [WLAN-RFKILL EJM] [%s:%d] %d Read: %s\r\n", __FUNCTION__, __LINE__, (int)ret, eth_mac);
 			filp_close(filp, NULL);
 			return ret;
-        }
-	    filp_close(filp, NULL);  /* filp_close(filp, current->files) ?  */
-	    /* restore kernel memory setting */
-	    set_fs(old_fs);
+		}
+		filp_close(filp, NULL);  /* filp_close(filp, current->files) ?  */
+		/* restore kernel memory setting */
+		set_fs(old_fs);
 
 #if 0
 #if 1
