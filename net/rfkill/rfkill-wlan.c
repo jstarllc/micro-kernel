@@ -644,8 +644,8 @@ int rockchip_get_wifi_macStr(u8 *mac)
 	mm_segment_t old_fs;
 
 	old_fs = get_fs();
-    set_fs(KERNEL_DS);
-    memset(eth_mac, 0, 32);
+	set_fs(KERNEL_DS);
+	memset(eth_mac, 0, 32);
 	
 	filp = filp_open(WLAN_MAC_FILE, O_RDONLY,0);
 	if (! filp || IS_ERR(filp))
