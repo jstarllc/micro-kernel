@@ -1179,7 +1179,7 @@ wl_get_status_by_netdev(struct bcm_cfg80211 *cfg, s32 status,
 	BCM_LIST_FOR_EACH_ENTRY_SAFE(_net_info, next, &cfg->net_list, list) {
 		if (ndev && (_net_info->ndev == ndev)) {
 			stat = test_bit(status, &_net_info->sme_state);
-			printk("[EJM] found our netdevice, stat [%d] status [%d] smestats [%d]", stat, status, &_net_info->smestate);
+			printk("[EJM] found our netdevice, stat [%d] status [%d] smestats [%d]", stat, status, &_net_info->sme_state);
 			found = 1;
 			break;
 		}
