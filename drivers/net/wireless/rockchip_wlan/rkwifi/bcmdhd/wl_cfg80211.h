@@ -1171,17 +1171,24 @@ wl_get_status_by_netdev(struct bcm_cfg80211 *cfg, s32 status,
 	struct net_info *_net_info, *next;
 	u32 stat = 0;
 	unsigned long int flags;
+	u8 found = 0;
 
+	printk("[EJM] wl_get_status_by_netdev");
 	spin_lock_irqsave(&cfg->net_list_sync, flags);
 	GCC_DIAGNOSTIC_PUSH();
 	BCM_LIST_FOR_EACH_ENTRY_SAFE(_net_info, next, &cfg->net_list, list) {
 		if (ndev && (_net_info->ndev == ndev)) {
 			stat = test_bit(status, &_net_info->sme_state);
+			printk("[EJM] found our netdevice, stat [%d] status [%d] smestats [%d]", stat, status, &_net_info->smestate);
+			found = 1;
 			break;
 		}
 	}
 	GCC_DIAGNOSTIC_POP();
 	spin_unlock_irqrestore(&cfg->net_list_sync, flags);
+	if (!found) {
+		printk("[EJM] never found our netdevice");
+	}
 	return stat;
 }
 
