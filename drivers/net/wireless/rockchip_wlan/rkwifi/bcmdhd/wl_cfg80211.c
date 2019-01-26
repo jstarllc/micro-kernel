@@ -15094,7 +15094,7 @@ static s32 wl_escan_handler(struct bcm_cfg80211 *cfg, bcm_struct_cfgdev *cfgdev,
 			wl_get_drv_status(cfg, SCANNING, ndev),
 			ntoh32(e->event_type), 
 			ntoh32(e->status),
-			cfg->sched_scan_running);
+			cfg->sched_scan_running));
 		goto exit;
 	}
 	escan_result = (wl_escan_result_t *)data;
