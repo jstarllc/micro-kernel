@@ -15083,18 +15083,22 @@ static s32 wl_escan_handler(struct bcm_cfg80211 *cfg, bcm_struct_cfgdev *cfgdev,
 			ndev = cfg->escan_info.ndev;
 
 	}
+	/*
 	if (!ndev)
 		printk("[EJM] NO NET DEV\n");
 	if (!wl_get_drv_status(cfg, SCANNING, ndev) && !cfg->sched_scan_running)
 		printk("[EJM] NO OTHER STUFF (%d && %d)\n", !wl_get_drv_status(cfg, SCANNING, ndev), !cfg->sched_scan_running);
+	*/
 		
 	if (!ndev || (!wl_get_drv_status(cfg, SCANNING, ndev) && !cfg->sched_scan_running)) {
+		/*
 		WL_ERR(("[EJM] escan is not ready ndev %p drv_status 0x%x e_type %d e_states %d scan_running %d\n",
 			ndev, 
 			wl_get_drv_status(cfg, SCANNING, ndev),
 			ntoh32(e->event_type), 
 			ntoh32(e->status),
 			cfg->sched_scan_running));
+		*/
 		goto exit;
 	}
 	escan_result = (wl_escan_result_t *)data;
