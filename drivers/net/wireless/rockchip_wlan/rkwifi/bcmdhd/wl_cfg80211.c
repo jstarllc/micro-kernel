@@ -20056,6 +20056,7 @@ wl_cfg80211_ch_switch_notify(struct net_device *dev, uint16 chanspec, struct wip
 		printf("wiphy is null\n");
 		return;
 	}
+#define ALLOW_CHSW_EVT 1
 #ifndef ALLOW_CHSW_EVT
 	/* Channel switch support is only for AP/GO/ADHOC/MESH */
 	if (dev->ieee80211_ptr->iftype == NL80211_IFTYPE_STATION ||
