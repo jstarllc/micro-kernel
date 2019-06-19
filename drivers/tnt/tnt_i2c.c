@@ -61,6 +61,7 @@ void i2c_delay(unsigned long delay)
 
 	while(count--)
 	{
+		udelay(1);
 	}
 }
 
