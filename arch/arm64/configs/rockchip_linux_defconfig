@@ -21,7 +21,26 @@ CONFIG_IP_VS=y
 CONFIG_CGROUP_PIDS=y
 CONFIG_MEMCG_KMEM=y
 CONFIG_CGROUP_PERF=y
-CONFIG_RT_GROUP_SCHED=y
+# CONFIG_RT_GROUP_SCHED is not set
+# EJM I turned off the Realtime Group Scheduling above because it's 
+# not allowing Josh to set particular threads to priority 99 using 
+# pthread_setschedparam(). You get the error: 
+#
+# unsuccessful in setting thread realtime priority. pthread_setschedparam() failed: Invalid privileges
+#
+# From what I've read, we probably _should_ have this option on, but I 
+# don't really know how to configure it. (you need to setup task groups and associate
+# tasks with these groups, then allocate CPU bandwith to those groups.) The docs say: 
+# 
+# Realtime group scheduling means you have to assign a portion of total CPU
+# bandwidth to the group before it will accept realtime tasks. Therefore you will
+# not be able to run realtime tasks as any user other than root until you have
+# done that, even if the user has the rights to run processes with realtime
+# priority!
+# 
+# so that's probably what's going wrong
+# docs for this can be found here: 
+# https://www.kernel.org/doc/Documentation/scheduler/sched-rt-group.txt
 CONFIG_BLK_CGROUP=y
 CONFIG_CGROUP_WRITEBACK=y
 CONFIG_BLK_DEV_THROTTLING=y
