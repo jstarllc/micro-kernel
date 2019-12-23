@@ -119,7 +119,8 @@ void tnt_led_proc_init(void)
 	static int first_one = 0;
 	Led_pwm_t pwm;
 	int i;
-	int led_start_val; // EJM
+	int led_start_val; // JOSH
+	extern char *saved_command_line; // JOSH
 		
 	led_i2c_init();
 
@@ -187,15 +188,15 @@ void tnt_led_proc_init(void)
 	led_i2c_byte_write(LED_B_ADDR, 0x01, 0x00);	
 #endif
 
-	extern char *saved_command_line;
 	if(first_one == 0)
 	{
-		// EJM 
+		// JOSH 
 		// we now check the boot command line args for "noleds" and if it 
 		// exists we set the boot LED starting value to 0
 		led_start_val = PWM_MAX/4;
 		if (strstr(saved_command_line,"noleds")) {
-			led_start_val = 0
+			led_start_val = 0;
+			printk( "JOSH - Kernel booting with LEDs disabled\n" );
 		}
 		for(i = 0; i < MAX_CHANNEL; i++)
 		{
