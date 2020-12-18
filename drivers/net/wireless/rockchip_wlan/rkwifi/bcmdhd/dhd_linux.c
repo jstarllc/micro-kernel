@@ -11064,11 +11064,15 @@ dhd_preinit_ioctls(dhd_pub_t *dhd)
 				goto done;
 			}
 		}
-	} else {
+	}
+	// EJM It's possible for us to not have a custom MAC address
+	// If we don't have a custom one, we shouldn't die here, we should
+	// continue setting up and use the HW provided default MAC.
+	/*else {
 		DHD_ERROR(("%s: can't get custom MAC address, ret=%d\n", __FUNCTION__, ret));
 		ret = BCME_NOTUP;
 		goto done;
-	}
+	}*/
 #endif /* GET_CUSTOM_MAC_ENABLE */
 	/* Get the default device MAC address directly from firmware */
 	memset(buf, 0, sizeof(buf));
